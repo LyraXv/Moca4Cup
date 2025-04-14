@@ -114,9 +114,18 @@ def get_structure_features(data_type):
 def get_content_features(data_type):
     # code sim
     cs_file_path = f"../info/sim_score_{data_type}.csv"
+
     df_cs = pd.read_csv(cs_file_path)
+    df_cs = df_cs.drop(columns=['sim_score'])
+    # df_cs['sim_score'] = df_cs['sim_score'].clip(0,1)
+    # df_cs['sim_score'] = df_cs['sim_score'].round(5)
+    # df_cs['sim_score'] = 1 - df_cs['sim_score']
+
+    df_cs['sim_cocom'] = 1 - df_cs['sim_cocom']
+
     df_cs['codeChangeNum'] = 0
     df_cs['codeChangeScore'] = 0
+
     df_cs['refactoringTypeNum'] = 0
     df = df_cs
 
@@ -145,7 +154,8 @@ def get_content_features(data_type):
 
             mask = (df['sample_id'] == sample_id) & (df['index'] == index)
             df.loc[mask,'refactoringTypeNum'] = len(item['refactoringType'])
-    print(df.head())
+    # 判断重构
+    df['refactoringTypeNum'] = np.where(df['refactoringTypeNum'] > 0, 0, 1)
     return df
 
 def analyze_change_type(changeTypeList):
