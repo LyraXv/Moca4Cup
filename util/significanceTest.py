@@ -14,18 +14,19 @@ def analyze_feature(group0,group1,feature):
 
     return u_stat, p_value, delta ,magnitude
 
-def read_clustered_data():
-    df = pd.read_csv("../info/clustered_data_test_all.csv")
+def read_splitted_data():
+    df = pd.read_csv("../info/ranked_data_res_test.csv")
     return df
 
 if __name__ == "__main__":
-    data = read_clustered_data()
+    data = read_splitted_data()
     key_columns = ['sample_id','index']
     df = data.drop(columns=key_columns)
 
     # 分组数据
     group0 = df[df['label'] == 0]
-    group1 = df[df['label'] == 1]
+    group1 = df[df['label'] == 2]
+    # group1['label'] =1
 
     # 逐特征分析
     results = {}
