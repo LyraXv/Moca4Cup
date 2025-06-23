@@ -71,7 +71,16 @@ def get_bottom_ids(ranked_data,percent):
     top_ids_set = set(top_ids.itertuples(index=False,name=None))
     return top_ids_set
 
-def intersection_data(data,percent):
+
+def label_by_dims(data, percent):
+    top_ids = get_top_ids(data,percent)
+    bottom_ids = get_bottom_ids(data,percent)
+    data['label'] = 1
+    data['label'] = data.apply(lambda row :2 if(row['sample_id'],row['index']) in top_ids else row['label'], axis=1)
+    data['label'] = data.apply(lambda row :0 if(row['sample_id'],row['index']) in bottom_ids else row['label'], axis=1)
+    return data
+
+def intersection_data(data,dataset,percent,dims_percent):
 
     size_columns = ['sample_id','index', 'NMT', 'NMS', 'NML', 'NMC', 'NNTRP', 'NNSRP','NTOD', 'NSOD']
     structure_columns = ['sample_id','index', 'CC_delta', 'delta_dependency']
@@ -90,6 +99,7 @@ def intersection_data(data,percent):
     result_df = data
     result_df['label'] = 1
 
+
     # high
     ids_size = get_top_ids(test_data_size,percent=percent)
     ids_structure = get_top_ids(test_data_structure,percent=percent)
@@ -104,7 +114,24 @@ def intersection_data(data,percent):
     common_pairs = ids_size.intersection(ids_structure, ids_content)
     result_df['label'] = result_df.apply(lambda row :0 if(row['sample_id'],row['index']) in common_pairs else row['label'], axis=1)
 
-    result_df.to_csv(f"../info/ranked_data_{dims}_intersectionRes.csv")
+    # labelByDims
+    test_data_size = label_by_dims(test_data_size, dims_percent)
+    test_data_size = test_data_size[['sample_id', 'index', 'label', 'score']].rename(
+        columns={'score': 'size_score', 'label': 'size_label'})
+    result_df = result_df.merge(test_data_size,on=['sample_id','index'],how='left')
+    test_data_structure = label_by_dims(test_data_structure, dims_percent)
+    test_data_structure = test_data_structure[['sample_id', 'index', 'label', 'score']].rename(
+        columns={'score': 'structure_score', 'label': 'structure_label'})
+    result_df = result_df.merge(test_data_structure,on=['sample_id','index'],how='left')
+    test_data_content = label_by_dims(test_data_content, dims_percent)
+    test_data_content = test_data_content[['sample_id', 'index', 'label', 'score']].rename(
+        columns={'score': 'content_score', 'label': 'content_label'})
+    result_df = result_df.merge(test_data_content,on=['sample_id','index'],how='left')
+
+    cols_to_int = ['label','size_label','structure_label','content_label']
+    result_df[cols_to_int] = result_df[cols_to_int].astype(int)
+
+    result_df.to_csv(f"../info/ranked_data_res_{dataset}.csv")
 
 def rankDataByDims(data,dims,percent,top=True):
     data = rank_data(data,dims)
@@ -134,11 +161,12 @@ def labeledByRankAndPercent(data, percent,top):
 if __name__ == "__main__":
     dims = 'all'
     save_results = True
+    dataset = 'train'
+    dims_percent = 0.2
 
-    data = readData('test',dims)
+    data = readData(dataset,dims)
     # data.to_csv("../info/codeChangeFeatures_test_2.csv") # save features info
 
-
     # rankDataByDims(data,dims,percent=0.2,top=True)
-    intersection_data(data,percent=0.5)  # 三个维度50%的交集
+    intersection_data(data,dataset=dataset,percent=0.5,dims_percent=dims_percent)  # 三个维度50%的交集 + 各维度前n%
     # rank_data_weightedDims(data,percent=0.15)
