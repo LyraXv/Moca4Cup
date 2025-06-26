@@ -236,7 +236,7 @@ def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,
     all_items = []
 
     id_index_to_record = {}
-    with open('dataset/test_cup_withFeaturesandLabel.jsonl', 'r', encoding='utf8') as f_b:
+    with open('../dataset/test_cup_withFeaturesandLabel.jsonl', 'r', encoding='utf8') as f_b:
         for line in f_b:
             data = json.loads(line)
             id_b = int(data['sample_id'])
@@ -357,4 +357,4 @@ if __name__ == "__main__":
     for level in range(0,3):
         print("change_level:",level)
         llm_res = f"../result/{LLM_model}_p{top_p}t{temperature}_{sample_k}samples.jsonl"
-        eval_cup(changeLevel=level,ignore_case=True,K=1,top_p=top_p,temperature=temperature,llm_res=llm_res,output_path = "../info/cupLLM_metrics_res.csv",output_eval_res=True,)
+        eval_cup(changeLevel=level,ignore_case=True,K=1,top_p=top_p,temperature=temperature,llm_res=llm_res,output_path = "../eval_res/cupLLM_metrics_res.csv",output_eval_res=True,)
