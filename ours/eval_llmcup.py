@@ -1,11 +1,9 @@
 import json
-import logging
 import os.path
 import re
 from typing import Iterable, List
 
 import nltk
-import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
