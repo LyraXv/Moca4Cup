@@ -3,10 +3,12 @@ import numpy as np
 import pandas as pd
 from scipy.stats import mode
 from sklearn.cluster import KMeans
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from lightgbm import LGBMClassifier
@@ -24,10 +26,13 @@ def read_origin_data(datapath):
 
 def train(train_x_scaled,train_y,test_x_scaled,test_y):
     models = {
-        'NaiveBayes': GaussianNB(var_smoothing=0.001),
-        'RandomForest': RandomForestClassifier(max_depth=15, n_estimators=150,random_state=42),
-        'DecisionTree': DecisionTreeClassifier(max_depth=15,random_state=42),
+        # 'NaiveBayes': GaussianNB(var_smoothing=0.001),
+        # 'RandomForest': RandomForestClassifier(max_depth=15, n_estimators=150,random_state=42),
+        # 'DecisionTree': DecisionTreeClassifier(max_depth=15,random_state=42),
         'LightGBM': LGBMClassifier(learning_rate=0.1, max_depth=15, n_estimators=200, random_state=42),
+        # 'Logistic Regression': LogisticRegression(C=4),
+        # 'SVM':SVC(C= 16, gamma=2**-10, kernel= 'sigmoid',probability=True)
+
     }
     # 多分类 one-hot 编码（用于 AUC）
     classes = [0, 1, 2]
@@ -41,8 +46,8 @@ def train(train_x_scaled,train_y,test_x_scaled,test_y):
         y_proba = model.predict_proba(test_x_scaled)
 
         # save model
-        if name == 'LightGBM':
-            joblib.dump(model,'../model/lightGBM.pkl')
+        # if name == 'LightGBM':
+        #     joblib.dump(model,'../model/lightGBM.pkl')
 
         acc = accuracy_score(test_y, y_pred)
         precision = precision_score(test_y, y_pred, average=None, labels=classes)
@@ -86,7 +91,7 @@ def train(train_x_scaled,train_y,test_x_scaled,test_y):
         print("-" * 60)
 
         results_df = pd.DataFrame(all_results)
-        results_df.to_csv("../info/mlClassifiers_metrics_results3.csv", index=False)
+        results_df.to_csv("../info/mlClassifiers_metrics_results_svm2.csv", index=False)
 
 def train_noLabel(train_x_scaled,train_y,test_x_scaled,test_y):
     kmeans = KMeans(n_clusters=3, random_state=42)

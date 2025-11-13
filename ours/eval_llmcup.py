@@ -152,11 +152,11 @@ def comments_acc_and_recall(ref_comments, new_comments, K ,ignore_case):
     if correct:
         return 1,1
 
-    for k in range(1,K):
-        # print("acc_recall_current_k:",k)
-        correct_k = comments_equal(ref_comments,new_comments[k],ignore_case)
-        if correct_k:
-            return 0,1
+    # for k in range(1,K):
+    #     # print("acc_recall_current_k:",k)
+    #     correct_k = comments_equal(ref_comments,new_comments[k],ignore_case)
+    #     if correct_k:
+    #         return 0,1
     return 0,0
 
 def comments_recall(ref_comments, new_comments, K, ignore_case):
@@ -221,7 +221,6 @@ def cal_sari(pred_comments_tokenized_list, ref_comments_tokenized_list, src_comm
     print(f"sum:{sum(score)},len:{len(score)},sari:{sari_score}")
     return sari_score
 
-
 def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,output_eval_res=False):
     src_comments_tokenized_list = []
     ref_comments_tokenized_list = []
@@ -235,18 +234,21 @@ def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,
 
     id_index_to_record = {}
     with open('../dataset/test_cup_withFeaturesandLabel.jsonl', 'r', encoding='utf8') as f_b:
+    # with open('../dataset/valid_cup_withFeatures_600.jsonl', 'r', encoding='utf8') as f_b:  # paraK
+
         for line in f_b:
             data = json.loads(line)
             id_b = int(data['sample_id'])
             index_b = int(data['index'])
             id_index_to_record[(id_b, index_b)] = data
 
-
+    accuracy_key_list = []
     with open(llm_res, 'r', encoding='utf8') as f:
         for i,line in enumerate(tqdm(f.readlines())):
+            # if i==1000:
+            #     break
 
-            if i ==1000:
-                break
+            # print(line)
             data = json.loads(line)
             sample_id= int(data['sample_id'])
             index = int(data['index'])
@@ -258,7 +260,7 @@ def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,
 
             key = (sample_id, index)
             fileInfo = id_index_to_record[key]
-            if fileInfo['change_level_label'] != changeLevel:
+            if fileInfo['change_level_label'] != changeLevel and changeLevel != -1:
                 continue
             ref_comments = fileInfo['dst_desc']
 
@@ -286,6 +288,10 @@ def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,
             accuracy_list.append(accuracy)
             recall_list.append(recall)
 
+            # if accuracy ==1:
+            #     accuracy_key_list.append(key)
+
+
             # print("accuracy: ", accuracy, "recall:", recall)
 
             # for res_k in range(0,K):
@@ -294,8 +300,9 @@ def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,
             # recall = comments_recall(ref_comments, new_comments, K, ignore_case)
             # recall_list.append(recall)
         # print(total_accuracy_per_k)
-
-
+        # with open("gemini_bm25_noLevel_list.json", "w", encoding="utf-8") as f:
+        #     json.dump(accuracy_key_list, f, ensure_ascii=False, indent=2)
+        # exit()
         # # Metrics
         accuracy = sum(accuracy_list)/len(recall_list)
         recall = sum(recall_list)/len(recall_list)
@@ -303,20 +310,24 @@ def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,
         print(f"recall: {sum(recall_list)}, len: {len(recall_list)}")
 
         res_editDist = EditDistance().eval(pred_comments_tokenized_list, ref_comments_tokenized_list,ref_comments_tokenized_list,src_comments_tokenized_list)
+        # print(sample_id,pred_comments_tokenized_list)
         res_nlg = NLGMetrics().eval(pred_comments_tokenized_list, ref_comments_tokenized_list)
         sari = cal_sari(pred_comments_tokenized_list, ref_comments_tokenized_list, src_comments_tokenized_list)
         gleu = calcGleu(src_comments_tokenized_list, ref_comments_tokenized_list, pred_comments_tokenized_list,lowercase=True)
 
 
-        if temperature==-1:
-            temperature = "default"
+        # if temperature==-1:
+        #     temperature = "default"
         if top_p == -1:
             top_p = "default"
+        # temperature = "default"
+        # top_p = "default"
 
         if output_eval_res:
             eval_res = {
                 'ChangeLevel': changeLevel,
                 'Dims': 'all',
+                # 'Round': round_count, # paraK
                 'Method': LLM_model,
                 'top_p': top_p,
                 'temperature': temperature,
@@ -327,12 +338,12 @@ def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,
                 'correct_count_5': f"({sum(recall_list)}/{len(recall_list)})",
                 'ESS_ratio': f"{(res_editDist['ESS Ratio'] * 100):.2f}%",
                 'SARI': f"{(sari * 100):.2f}%",
-                'GLEU':f"{(gleu * 100):.2f}%",
                 "AED": round(res_editDist['hypo_distance'], 3),
                 "RED": round(res_editDist['rel_distance'], 3),
-                "Bleu_4": round(res_nlg['Bleu_4'], 3),
-                "METEOR": round(res_nlg['METEOR'], 3),
-                "ROUGE_L": round(res_nlg['ROUGE_L'], 3)
+                'GLEU': f"{(gleu * 100):.2f}",
+                "Bleu_4": f"{(res_nlg['Bleu_4'] * 100):.2f}",
+                "METEOR": f"{(res_nlg['METEOR'] * 100):.2f}",
+                "ROUGE_L":f"{(res_nlg['ROUGE_L'] * 100):.2f}",
             }
             if not os.path.exists(output_path):
                 new_df = pd.DataFrame([eval_res])
@@ -347,12 +358,36 @@ def eval_cup(changeLevel, ignore_case, K,top_p,temperature, llm_res,output_path,
 
 if __name__ == "__main__":
     # 读取test文件，逐条分析，分类器分类，判断结果，（分级查询），生产prompt，调用api,结果存储，输出
-    LLM_model = "gpt-4o-mini_BM25_diff"  #gemini-2.5-flash-preview-05-20-nothinking  gpt-4o-mini
-    sample_k = 3
+    folder="ablation"
+    LLM_model = "gemini-2.5-flash-nothinking_dfg_woStruct"
+    sample_k = -1
     top_p = -1.0
     temperature = 0.0
+    save_file = "../eval_res/res_11.csv"
 
+
+# ParaK
+#     sample_k_list =[0,1,3,5,7,9,11,13,15]
+#     for sample_k in sample_k_list:
+#         for round_count in [5]:
+#             for level in [0,1,2]:
+#                     llm_res = f"../result/{folder}{round_count}/{LLM_model}_p{top_p}t{temperature}_{sample_k}samples.jsonl"
+#                     eval_cup(changeLevel=level, ignore_case=True, K=1, top_p=top_p, temperature=temperature, llm_res=llm_res,
+#                              output_path=save_file, output_eval_res=True, )
+
+    # # 分等级评估结果
+    llm_res = f"../result/{folder}/{LLM_model}_p{top_p}t{temperature}_{sample_k}samples.jsonl"
     for level in range(0,3):
-        print("change_level:",level)
-        llm_res = f"../result/{LLM_model}_p{top_p}t{temperature}_{sample_k}samples.jsonl"
-        eval_cup(changeLevel=level,ignore_case=True,K=1,top_p=top_p,temperature=temperature,llm_res=llm_res,output_path = "../eval_res/cupLLM_metrics_res.csv",output_eval_res=True,)
+        eval_cup(changeLevel=level, ignore_case=True, K=1, top_p=top_p, temperature=temperature, llm_res=llm_res,
+                 output_path=save_file, output_eval_res=True, )
+
+    # 全部结果
+    eval_cup(changeLevel=-1, ignore_case=True, K=1, top_p=top_p, temperature=temperature, llm_res=llm_res,
+             output_path=save_file, output_eval_res=True, )
+    #
+    # for fused_weight in [0.9]:
+    #     for level in range(0,3):
+    #         print("change_level:",level)
+    #         # llm_res = f"../result/resMain/{LLM_model}_p{top_p}t{temperature}_{sample_k}samples.jsonl"
+    #         llm_res = f"../result/resWeighted/gemini-2.5-flash-nothinking_processed_dfg_{fused_weight}diffW.jsonl"
+    #         eval_cup(changeLevel=level,ignore_case=True,K=1,top_p=top_p,temperature=temperature,llm_res=llm_res,output_path = "../eval_res/tmp_res.csv",output_eval_res=True,)

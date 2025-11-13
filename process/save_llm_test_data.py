@@ -34,7 +34,7 @@ def load_change_type_jsonl(dataPath):
     return lookup_dict
 
 
-DATA_TYPE ='test'
+DATA_TYPE ='valid'
 # 加载特征数据
 features_df = pd.read_csv(f'../info/ranked_data_res_{DATA_TYPE}.csv')
 change_label_df = features_df[['sample_id','index','label']]
@@ -48,8 +48,13 @@ total_change_type_set = set()
 change_type_path = f"../info/ChangeTypeRes_{DATA_TYPE}.jsonl"
 change_type_dict = load_change_type_jsonl(change_type_path)
 
+
+
+## 取600组样本
+samples_num = [0,0,0]
+
 # 打开新的jsonl文件用于写入
-with open(f'../info_process/{DATA_TYPE}_cup_withFeatures_ver2.jsonl', 'w') as fout, open(f'../dataset/{DATA_TYPE}_clean.jsonl', 'r') as fin:
+with open(f'../info_process/{DATA_TYPE}_cup_withFeatures.jsonl', 'w') as fout, open(f'../dataset/{DATA_TYPE}_clean.jsonl', 'r') as fin:
     for line in fin:
         data = json.loads(line)
 
@@ -70,14 +75,24 @@ with open(f'../info_process/{DATA_TYPE}_cup_withFeatures_ver2.jsonl', 'w') as fo
         except KeyError:
             print(f"ChangeLabel not found for id={id_}, index={index_}, skipping.")
             continue
-        # data['change_level_label'] = int(change_row.values[0])
+
+        # current_change_level = change_row.values[0]
+        # samples_num[current_change_level] += 1
+        # if samples_num[current_change_level] >200:
+        #     continue
+
+        data['change_level_label'] = int(change_row.values[0])
 
         # 提取并保存变化类型数据
         key = (str(id_), str(index_))
         matched_data = change_type_dict.get(key, None)
+
+
         change_type_set = analyze_change_type_info(matched_data['codeChangeType'])
         total_change_type_set.update(change_type_set)
         data['ChangeType'] = list(change_type_set)
+
+        # data['codeChangeType'] = matched_data['codeChangeType']
 
         # 保存到新文件
         fout.write(json.dumps(data) + '\n')

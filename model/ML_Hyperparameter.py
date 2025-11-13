@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, cross_validate, StratifiedKFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from lightgbm import LGBMClassifier
 from sklearn.preprocessing import StandardScaler
@@ -38,23 +40,29 @@ cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
 # ========= 模型与参数 ========= #
 models = {
-    "Naive Bayes": (GaussianNB(), {
-        'var_smoothing': [0, 1e-9, 1e-7, 1e-5, 1e-3]
-    }),
-    "Random Forest": (RandomForestClassifier(random_state=42), {
-        'max_depth': [7, 9, 11, 13, 15],
-        'n_estimators': [50, 100, 150, 200, 250]
-    }),
-    "Decision Tree": (DecisionTreeClassifier(random_state=42), {
-        'max_depth': [7, 9, 11, 13, 15]
-    }),
-    "LightGBM": (LGBMClassifier(random_state=42), {
-        'max_depth': [7, 9, 11, 13, 15],
-        'n_estimators': [50, 100, 150, 200, 250],
-        'learning_rate': [0.001, 0.005, 0.01, 0.05, 0.1],
-        'verbose':[0]
+    # "Naive Bayes": (GaussianNB(), {
+    #     'var_smoothing': [0, 1e-9, 1e-7, 1e-5, 1e-3]
+    # }),
+    # "Random Forest": (RandomForestClassifier(random_state=42), {
+    #     'max_depth': [7, 9, 11, 13, 15],
+    #     'n_estimators': [50, 100, 150, 200, 250]
+    # }),
+    # "Decision Tree": (DecisionTreeClassifier(random_state=42), {
+    #     'max_depth': [7, 9, 11, 13, 15]
+    # }),
+    # "LightGBM": (LGBMClassifier(random_state=42), {
+    #     'max_depth': [7, 9, 11, 13, 15],
+    #     'n_estimators': [50, 100, 150, 200, 250],
+    #     'learning_rate': [0.001, 0.005, 0.01, 0.05, 0.1],
+    #     'verbose':[0]
+    # }),
+    'SVM': (SVC(), [{'kernel': ['linear'], 'C': [2 ** x for x in range(-10, 11)]},
+                    {'kernel': ['rbf', 'sigmoid'], 'C': [2 ** x for x in range(-10, 11)],
+                     'gamma': [2 ** x for x in range(-10, 11)] + ['scale']},
+                    {'kernel': ['poly'], 'C': [2 ** x for x in range(-10, 11)],
+                     'gamma': [2 ** x for x in range(-10, 11)] + ['scale'], 'degree': [2, 3, 4, 5]}]),
+    'Logistic Regression': (LogisticRegression(), {'C': [x for x in range(1, 11)]}),
 
-    }),
 }
 
 # ========= 模型训练与评估 ========= #
@@ -97,6 +105,6 @@ summary = pd.DataFrame({
         'AUC_macro (Test)': results[model]['test_auc_macro']
     } for model in results
 }).T
-summary.to_csv("ML_classifiers_best_results.csv")
+summary.to_csv("ML_classifiers_best_results_SVM_LR.csv") #存储最佳结果
 print("\n=== Test Set Macro-Average Summary ===")
 print(summary)

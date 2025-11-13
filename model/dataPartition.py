@@ -12,7 +12,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import MinMaxScaler
 
-from model.clusterMethod import get_size_features, get_structure_features, get_content_features
+from model.loadMethod import get_size_features, get_structure_features, get_content_features
 
 
 def readData(data_type,dims):
