@@ -1,0 +1,298 @@
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli webchat \
+--model_name_or_path /data2/zxw/lyra/model/Meta-Llama-3-8B-Instruct \
+--template llama3
+
+    /data2/zxw/lyra/LLaMA-Factory-main
+
+训练：
+CUDA_VISIBLE_DEVICES=0,1,2,3 llamafactory-cli train examples/train_lora/llama3_lora_sft.yaml
+
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli train examples/train_lora/codeLlama_lora_sft.yaml
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli train examples/train_lora/
+
+
+
+train_cup_all.json
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli train examples/train_cup/llama3_lora_sft_all.yaml
+【x】CUDA_VISIBLE_DEVICES=1 llamafactory-cli train examples/train_cup/qwen3_lora_sft_all.yaml 
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli train examples/train_cup/codeLlama_lora_sft_all.yaml 
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli train examples/train_cup/deepseek-coder_lora_sft_all.yaml
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli train examples/train_cup/starCoder2_lora_sft_all.yaml
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli train examples/train_cup/deepseek-coder-cup_lora_sft_all.yaml
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli train examples/train_cup/codeLlama-cup_lora_sft_all.yaml
+
+
+train_cup_part_ver2
+CUDA_VISIBLE_DEVICES=0,1 llamafactory-cli train examples/train_cup/starCoder2_lora_sft_part.yaml
+CUDA_VISIBLE_DEVICES=0,1 llamafactory-cli train examples/train_cup/starCoder2_lora_sft_per10.yaml
+
+
+
+panthap.json
+
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli train examples/train_cup/starCoder2_lora_panthap.yaml
+
+
+# diff
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli train examples/train_cup/starCoder2_lora_all_diff.yaml
+
+
+
+
+
+沟通：
+llamafactory-cli chat \
+--model_name_or_path /data2/zxw/lyra/model/Meta-Llama-3-8B-Instruct \
+--adapter_name_or_path ./saves/llama3-8b/lora/cupTrain \
+--template llama3 \
+--finetuning_type lora
+
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli chat examples/inference/qwen3_lora_infer.yaml
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli chat examples/inference/qwen2_5coder_lora_infer.yaml
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli chat examples/inference/codeLlama_lora_infer.yaml
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli chat examples/inference/starCoder2_lora_infer.yaml
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli chat examples/inference/deepseek-coder_lora_infer.yaml
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli chat examples/inference/deepseek-coder-cup_lora_infer.yaml
+
+
+
+CUDA_VISIBLE_DEVICES=0 llamafactory-cli chat examples/inference/starcoder2_part_lora_infer.yaml
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli chat examples/inference/starCoder2_lora_panthap_infer.yaml
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli chat examples/inference/starCoder2_diff_all_infer.yaml
+
+
+
+
+
+
+
+
+合并model+adapter
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli export examples/merge_lora/llama3_lora_sft.yaml
+
+
+
+预测：
+CUDA_VISIBLE_DEVICES=0,1,2,3 llamafactory-cli train examples/predict/llama3_lora_predict.yaml
+
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli train examples/predict/llama3_lora_predict.yaml
+
+CUDA_VISIBLE_DEVICES=1 llamafactory-cli train examples/predict/llama3_lora_predict_all.yaml
+
+
+
+
+
+API 推断：
+API_PORT=8001 CUDA_VISIBLE_DEVICES=1 llamafactory-cli api examples/inference/llama3_lora_sft.yaml
+API_PORT=8001 CUDA_VISIBLE_DEVICES=0,1 llamafactory-cli api examples/inference/codeLlama_infer.yaml
+
+
+
+API_PORT=8001 CUDA_VISIBLE_DEVICES=1 llamafactory-cli api examples/inference/qwen3_lora_infer.yaml
+API_PORT=8001 CUDA_VISIBLE_DEVICES=1 llamafactory-cli api examples/inference/codeLlama_lora_infer.yaml
+API_PORT=8002 CUDA_VISIBLE_DEVICES=1 llamafactory-cli api examples/inference/deepseek-coder_lora_infer.yaml
+API_PORT=8001 CUDA_VISIBLE_DEVICES=0 llamafactory-cli api examples/inference/deepseek-coder-cup_lora_infer.yaml
+API_PORT=8001 CUDA_VISIBLE_DEVICES=0 llamafactory-cli api examples/inference/starCoder2_lora_infer.yaml
+API_PORT=8001 CUDA_VISIBLE_DEVICES=0 llamafactory-cli api examples/inference/codeLlama-cup_lora_infer.yaml
+
+
+API_PORT=8001 CUDA_VISIBLE_DEVICES=1 llamafactory-cli api examples/inference/starCoder2_lora_infer.yaml
+API_PORT=8002 CUDA_VISIBLE_DEVICES=1 llamafactory-cli api examples/inference/starcoder2_part_lora_infer.yaml
+API_PORT=8001 CUDA_VISIBLE_DEVICES=1 llamafactory-cli api examples/inference/starCoder2_diff_all_infer.yaml
+
+
+
+
+
+CUDA_VISIBLE_DEVICES=1 python ours/api_predict_results.py --model "starCoder2_diff" --sample_k 0 --top_p -1 --port 8001
+[RANDOM] CUDA_VISIBLE_DEVICES=1 python ours/api_predict_results_randomSearch.py --model "codeLlama" --sample_k 3 --top_p -1 --port 8001
+[DIFF] 
+CUDA_VISIBLE_DEVICES=1 python ours/diff_predict_results.py --model "starCoder2_diff" --sample_k 2 --top_p -1 --port 8001
+注意： diff_predict_results的数据集和描述内容有误diff_str
+
+
+
+
+API_PORT=8002 CUDA_VISIBLE_DEVICES=0 llamafactory-cli api examples/inference/deepseek-coder_lora_infer.yaml
+
+
+【GPT_PREDICT】
+python ours/gpt_predict_results.py --model "gpt-4o-mini" --sample_k 0 --top_p -1
+CUDA_VISIBLE_DEVICES=1 python ours/gpt_predict_results.py --model "gpt-4o-mini" --sample_k 3 --top_p -1
+CUDA_VISIBLE_DEVICES=1 python ours/gpt_predict_results.py --model "gpt-4o-mini" --sample_k 3 --top_p -1
+CUDA_VISIBLE_DEVICES=1 python ours/gpt_diff_predict_results.py --model "gpt-4o-mini" --sample_k 10 --top_p -1
+CUDA_VISIBLE_DEVICES=0 python ours/gpt_diff_predict_results.py --model "gemini-2.5-flash-preview-05-20-nothinking" --sample_k 3 --top_p -1
+
+CUDA_VISIBLE_DEVICES=0 python ours/gpt_diff_predict_results.py --model "gemini-2.5-flash-nothinking" --sample_k 2 --top_p -1
+
+
+
+
+
+
+[random]python ours/api_predict_results_randomSearch.py --model "gpt-4o-mini" --sample_k 3 --top_p -1 --port 8001
+[random]python ours/api_predict_results_randomSearch.py --model "gemini-2.5-flash-nothinking" 
+python ours/api_predict_results_randomSearch.py --model "CodeLlama-34b-Instruct-hf" 
+python ours/api_predict_results_randomSearch.py --model "DeepSeek-V3" 
+python ours/api_predict_results_randomSearch.py --model "starcoder2-7b" 
+
+
+[BM25]python ours/api_predict_results_BM25.py --model "gemini-2.5-flash-preview-05-20-nothinking" --sample_k 3 --top_p -1 --port 8001
+[BM25]CUDA_VISIBLE_DEVICES=1 python ours/api_predict_results_BM25.py --model "gpt-4o-mini" --sample_k 3 --top_p -1 --port 8001
+[BM25-250731]python ours/predict_results_BM25.py --model "gemini-2.5-flash-nothinking" 
+[BM25-250805]增加分级查询 文件名: 模型_BM25L_dfg
+python ours/predict_results_BM25_ver2.py --model "gemini-2.5-flash-nothinking" 
+python ours/predict_results_BM25_ver2.py --model "CodeLlama-34b-Instruct-hf" 
+python ours/predict_results_BM25_ver2.py --model "starcoder2-7b" 
+python ours/predict_results_BM25_ver2.py --model "DeepSeek-V3" 
+
+
+
+
+[BM25-GPU-250817]python ours/predict_results_BM25_gpu.py --model "gemini-2.5-flash-nothinking" #bukexing
+
+
+
+[complexCup]CUDA_VISIBLE_DEVICES=0 python ours/ComplexCup.py --model "gemini-2.5-flash-nothinking" --sample_k 3 --top_p -1 --port 8001
+[dfg+ct]CUDA_VISIBLE_DEVICES=1 python ours/complexCup_changeType.py --model "gemini-2.5-flash-nothinking" --sample_k 3 --top_p -1 --port 8001
+[parameterK]python ours/parameter_K.py --model "gemini-2.5-flash-nothinking" 
+[parameterK]python ours/parameter_K_continue.py --model "gemini-2.5-flash-nothinking" --sample_k 9
+
+[parameterK-local]python ours/parameter_K.py --model "CodeLlama-34b-Instruct-hf"
+
+[complexCupTmp]python ours/complexCup_tmp.py --model "gemini-2.5-flash-nothinking" 
+python ours/complexCup_tmp.py --model "gpt-4.1-mini" 
+python ours/complexCup_tmp.py --model "DeepSeek-V3"  
+python ours/complexCup_tmp.py --model "grok-3-mini"  # 返回原始注释
+python ours/complexCup_tmp.py --model "DeepSeek-V3.1" 
+python ours/complexCup_tmp.py --model "gemini-2.5-flash-nothinking" --sample_k 0
+python ours/complexCup_tmp.py --model "deepseek-coder-6.7b-instruct"
+python ours/complexCup_tmp.py --model "CodeLlama-34b-Instruct-hf"
+python ours/complexCup_tmp.py --model "starcoder2-7b"
+python ours/complexCup_tmp.py --model "qwen3-coder-flash"
+python ours/complexCup_tmp.py --model "gpt-4o"
+python ours/complexCup_tmp.py --model "Qwen2.5-Coder-7B"
+
+python ours/complexCup_tmp.py --model "Qwen3-Coder-30B-A3B-Instruct"
+
+python ours/complexCup_tmp.py --model "claude-3-haiku-20241022"
+python ours/complexCup_tmp.py --model "claude-3-haiku-all"
+
+
+【SVM】
+python ours/method/ML_svm.py --para_index 1
+python ours/method/ML_svm.py --para_index 2
+CUDA_VISIBLE_DEVICES=1 python ours/method/ML_svm.py --para_index 3
+CUDA_VISIBLE_DEVICES=1 python ours/method/ML_svm.py --para_index 4
+CUDA_VISIBLE_DEVICES=1 python ours/method/ML_svm.py --para_index 5
+# 1,2,3 running
+
+
+
+
+
+
+
+
+
+
+
+
+[complexCup_newInstr]
+python ours/complexCup_newInstr.py --model "gpt-4o"
+
+
+
+
+
+
+[complexCup_zero]
+python ours/complexCup_zero.py --model "CodeLlama-34b-Instruct-hf"
+python ours/complexCup_zero.py --model "starcoder2-7b"
+python ours/complexCup_zero.py --model "DeepSeek-V3"
+
+[Moca4Cup_changePattern]
+python ours/Moca4Cup_wo_struct.py --model "starcoder2-7b"
+ 
+
+
+[commplexCup_LocalSearch]
+python ours/complexCup_LocalSearch.py --model "DeepSeek-V3" 
+python ours/complexCup_LocalSearch.py --model "DeepSeek-R1"
+python ours/complexCup_LocalSearch.py --model "gemini-2.5-flash-nothinking"
+python ours/complexCup_LocalSearch.py --model "o4-mini" # 返回原始注释
+python ours/complexCup_LocalSearch.py --model "o3-mini" # 返回原始注释
+python ours/complexCup_LocalSearch.py --model "gpt-3.5-turbo" # 准确率不高，比4.1 mini低
+python ours/complexCup_LocalSearch.py --model "gpt-4.1-mini"
+python ours/complexCup_LocalSearch.py --model "gpt-5-mini"
+
+haiku-all 503 无可用渠道
+python ours/complexCup_LocalSearch2.py --model "claude-3-haiku-20241022"
+
+
+[wo_struct_parameters]
+【完成】python ours/view_wo_struct_samples_Args.py --begin 0 --end 1000 
+python ours/view_wo_struct_samples_Args.py --begin 1000 --end 2000
+python ours/view_wo_struct_samples_Args.py --begin 2000 --end 3000
+python ours/view_wo_struct_samples_Args.py --begin 3000 --end 4000
+python ours/view_wo_struct_samples_Args.py --begin 4000 --end 5000
+python ours/view_wo_struct_samples_Args.py --begin 5000 --end 6000
+python ours/view_wo_struct_samples_Args.py --begin 6000 --end 7000
+
+【完成】python ours/view_wo_struct_samples_Args.py --begin 7000 --end 8000
+【完成】python ours/view_wo_struct_samples_Args.py --begin 8000 --end 9204
+
+
+
+\
+
+[weighted]
+python ours/complexCup_384_weighted.py --model "gemini-2.5-flash-nothinking"
+python ours/complexCup_384_weighted2.py --model "gemini-2.5-flash-nothinking"
+\
+
+[complexCup_concat]
+python ours/complexCup_concat.py --model "gemini-2.5-flash-nothinking"
+
+
+
+[complexCup_k] 不同等级固定K值
+python ours/complexCup_k.py --model "CodeLlama-34b-Instruct-hf" 
+
+
+【Attention】 ip地址最好写服务器对应的ip，否则会InternalServerError
+
+VLLM + API 推断（注意：VLLM推理需要用合并的模型，VLLM推理不能生成多个结果）
+CUDA_VISIBLE_DEVICES=1 API_PORT=8001 llamafactory-cli api \
+--model_name_or_path output/llama3_lora_sft_tmp \
+--template llama3 \
+--infer_backend vllm \
+--vllm_enforce_eager
+
+(llamaFactory)
+
+
+验证用例：
+
+
+Please write five different new comments according to the old comment and the changes between the old and new code:\nold code: private SSLConfig configureLegacyServerSSL(final DistributionConfig distributionConfig,\n      final SSLConfig sslConfig) {\n    sslConfig.setCiphers(distributionConfig.getServerSSLCiphers());\n    sslConfig.setEnabled(distributionConfig.getServerSSLEnabled());\n    sslConfig.setKeystore(distributionConfig.getServerSSLKeyStore());\n    sslConfig.setKeystorePassword(distributionConfig.getServerSSLKeyStorePassword());\n    sslConfig.setKeystoreType(distributionConfig.getServerSSLKeyStoreType());\n    sslConfig.setTruststore(distributionConfig.getServerSSLTrustStore());\n    sslConfig.setTruststorePassword(distributionConfig.getServerSSLTrustStorePassword());\n    sslConfig.setTruststoreType(distributionConfig.getServerSSLKeyStoreType());\n    sslConfig.setProtocols(distributionConfig.getServerSSLProtocols());\n    sslConfig.setRequireAuth(distributionConfig.getServerSSLRequireAuthentication());\n    return sslConfig;\n  }\nnew code:\nprivate SSLConfig.Builder configureLegacyServerSSL(final DistributionConfig distributionConfig,\n      final SSLConfig.Builder sslConfigBuilder) {\n    sslConfigBuilder.setCiphers(distributionConfig.getServerSSLCiphers());\n    sslConfigBuilder.setEnabled(distributionConfig.getServerSSLEnabled());\n    sslConfigBuilder.setKeystore(distributionConfig.getServerSSLKeyStore());\n    sslConfigBuilder.setKeystorePassword(distributionConfig.getServerSSLKeyStorePassword());\n    sslConfigBuilder.setKeystoreType(distributionConfig.getServerSSLKeyStoreType());\n    sslConfigBuilder.setTruststore(distributionConfig.getServerSSLTrustStore());\n    sslConfigBuilder.setTruststorePassword(distributionConfig.getServerSSLTrustStorePassword());\n    sslConfigBuilder.setTruststoreType(distributionConfig.getServerSSLKeyStoreType());\n    sslConfigBuilder.setProtocols(distributionConfig.getServerSSLProtocols());\n    sslConfigBuilder.setRequireAuth(distributionConfig.getServerSSLRequireAuthentication());\n    return sslConfigBuilder;\n  }\nold comment:\nConfigure a sslConfig for the server using the legacy configuration
+
+"output": "new comment: Configure a SSLConfig.Builder for the server using the legacy configuration"
+
+
+
+Please write a new comment according to the old comment and the changes between the old and new code:\nold code: public static Object wrap(Object object) {\n        try {\n            if (object == null) {\n                return NULL;\n            }\n            if (object instanceof JSONObject || object instanceof JSONArray ||\n                    NULL.equals(object) ||\n                    object instanceof Byte || object instanceof Character ||\n                    object instanceof Short || object instanceof Integer ||\n                    object instanceof Long || object instanceof Boolean ||\n                    object instanceof Float || object instanceof Double ||\n                    object instanceof String) {\n                return object;\n            }\n\n            if (object instanceof Collection) {\n                return new JSONArray((Collection) object);\n            }\n            if (object.getClass().isArray()) {\n                return new JSONArray(object);\n            }\n            if (object instanceof Map) {\n                return new JSONObject((Map) object);\n            }\n            Package objectPackage = object.getClass().getPackage();\n            String objectPackageName = (objectPackage != null ? objectPackage.getName() : \"\");\n            if (objectPackageName.startsWith(\"java.\") ||\n                    objectPackageName.startsWith(\"javax.\") ||\n                    object.getClass().getClassLoader() == null) {\n                return object.toString();\n            }\n            return new JSONObject(object);\n        } catch (Exception exception) {\n            return null;\n        }\n    }\nnew code:\npublic static Object wrap(Object o) {\n        if (o == null) {\n            return NULL;\n        }\n        if (o instanceof JSONArray || o instanceof JSONObject) {\n            return o;\n        }\n        if (o.equals(NULL)) {\n            return o;\n        }\n        try {\n            if (o instanceof Collection) {\n                return new JSONArray((Collection) o);\n            } else if (o.getClass().isArray()) {\n                return new JSONArray(o);\n            }\n            if (o instanceof Map) {\n                return new JSONObject((Map) o);\n            }\n            if (o instanceof Boolean ||\n                    o instanceof Byte ||\n                    o instanceof Character ||\n                    o instanceof Double ||\n                    o instanceof Float ||\n                    o instanceof Integer ||\n                    o instanceof Long ||\n                    o instanceof Short ||\n                    o instanceof String) {\n                return o;\n            }\n            if (o.getClass().getPackage().getName().startsWith(\"java.\")) {\n                return o.toString();\n            }\n        } catch (Exception ignored) {\n        }\n        return null;\n    }\nold comment: If the wrapping fails,\nthen null is returned.\n new comment:
+
+"output": "new comment: If wrapping fails, returns null."
+
+
+
+
+You are an expert Java developer. Please write five possible new comments according to the old comment and the changes between the old and new code:\nold code: public static Object wrap(Object object) {\n        try {\n            if (object == null) {\n                return NULL;\n            }\n            if (object instanceof JSONObject || object instanceof JSONArray ||\n                    NULL.equals(object) ||\n                    object instanceof Byte || object instanceof Character ||\n                    object instanceof Short || object instanceof Integer ||\n                    object instanceof Long || object instanceof Boolean ||\n                    object instanceof Float || object instanceof Double ||\n                    object instanceof String) {\n                return object;\n            }\n\n            if (object instanceof Collection) {\n                return new JSONArray((Collection) object);\n            }\n            if (object.getClass().isArray()) {\n                return new JSONArray(object);\n            }\n            if (object instanceof Map) {\n                return new JSONObject((Map) object);\n            }\n            Package objectPackage = object.getClass().getPackage();\n            String objectPackageName = (objectPackage != null ? objectPackage.getName() : \"\");\n            if (objectPackageName.startsWith(\"java.\") ||\n                    objectPackageName.startsWith(\"javax.\") ||\n                    object.getClass().getClassLoader() == null) {\n                return object.toString();\n            }\n            return new JSONObject(object);\n        } catch (Exception exception) {\n            return null;\n        }\n    }\nnew code:\npublic static Object wrap(Object o) {\n        if (o == null) {\n            return NULL;\n        }\n        if (o instanceof JSONArray || o instanceof JSONObject) {\n            return o;\n        }\n        if (o.equals(NULL)) {\n            return o;\n        }\n        try {\n            if (o instanceof Collection) {\n                return new JSONArray((Collection) o);\n            } else if (o.getClass().isArray()) {\n                return new JSONArray(o);\n            }\n            if (o instanceof Map) {\n                return new JSONObject((Map) o);\n            }\n            if (o instanceof Boolean ||\n                    o instanceof Byte ||\n                    o instanceof Character ||\n                    o instanceof Double ||\n                    o instanceof Float ||\n                    o instanceof Integer ||\n                    o instanceof Long ||\n                    o instanceof Short ||\n                    o instanceof String) {\n                return o;\n            }\n            if (o.getClass().getPackage().getName().startsWith(\"java.\")) {\n                return o.toString();\n            }\n        } catch (Exception ignored) {\n        }\n        return null;\n    }\nold comment:\nIf the wrapping fails,\nthen null is returned.
+
+
+Please write a new comment according to the old comment and the changes between the old and new code. There are 2 examples for you, please learn from them.\n# example 1:\nold code: public void addAppEventListener(final AppEventListener listener) {\n        eventHandler.addListener(listener);\n    }\nnew code: public void addAppEventListener(final SystemEventListener listener) {\n        eventHandler.addListener(listener);\n    }\nold comment: Adds sub-types of {@link AppEventListener} to listen for notifications from the native Mac OS X system.\nnew comment: Adds sub-types of {@link SystemEventListener} to listen for notifications from the native Mac OS X system.\n\n# example 2:\nold code: public void addAppEventListener(final AppEventListener listener) {\n        eventHandler.addListener(listener);\n    }\nnew code: public void addAppEventListener(final SystemEventListener listener) {\n        eventHandler.addListener(listener);\n    }\nold comment: Adds sub-types of {@link AppEventListener} to listen for notifications from the native Mac OS X system.\nnew comment: Adds sub-types of {@link SystemEventListener} to listen for notifications from the native Mac OS X system.\n\nThe old comment and the changes between the old and new code:\nold code: static Builder builder(EventContext context, BaseEvent event) {\n    return new DefaultEventBuilder((BaseEventContext) context, (InternalEvent) event);\n  }\nnew code: static Builder builder(EventContext context, CoreEvent event) {\n    return new DefaultEventBuilder((BaseEventContext) context, (InternalEvent) event);\n  }\nold comment: A new\n{@link EventContext} is used instead of the existing instance referenced by the existing {@link BaseEvent}.\nnew comment: 
+
+
+You are an AI code comments updating Assistant.Please write five possible comments according to the old comment and the changes between the old and new code. There are 2 examples for you, please learn from them.\n# example 1:\nold code: public void addAppEventListener(final AppEventListener listener) {\n        eventHandler.addListener(listener);\n    }\nnew code: public void addAppEventListener(final SystemEventListener listener) {\n        eventHandler.addListener(listener);\n    }\nold comment: Adds sub-types of {@link AppEventListener} to listen for notifications from the native Mac OS X system.\nnew comment: Adds sub-types of {@link SystemEventListener} to listen for notifications from the native Mac OS X system.\n\n# example 2:\nold code: public void addAppEventListener(final AppEventListener listener) {\n        eventHandler.addListener(listener);\n    }\nnew code: public void addAppEventListener(final SystemEventListener listener) {\n        eventHandler.addListener(listener);\n    }\nold comment: Adds sub-types of {@link AppEventListener} to listen for notifications from the native Mac OS X system.\nnew comment: Adds sub-types of {@link SystemEventListener} to listen for notifications from the native Mac OS X system.\n\n# The old comment and the changes between the old and new code:\nold code: static Builder builder(EventContext context, BaseEvent event) {\n    return new DefaultEventBuilder((BaseEventContext) context, (InternalEvent) event);\n  }\nnew code: static Builder builder(EventContext context, CoreEvent event) {\n    return new DefaultEventBuilder((BaseEventContext) context, (InternalEvent) event);\n  }\nold comment: A new\n{@link EventContext} is used instead of the existing instance referenced by the existing {@link BaseEvent}.\n# new comment 1:# new comment 2:# new comment 3:# new comment 4:# new comment 5:\n

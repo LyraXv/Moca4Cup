@@ -1,27 +1,6 @@
 import pandas as pd
 from sklearn.metrics import cohen_kappa_score
 
-# data = pd.read_csv("../info/random_sample_partition_label_2.csv")
-# print(data.columns)
-#
-# data1 = data['cluster_label']
-# data2 = data['manual_label']
-#
-# print(data1)
-# print(data2)
-#
-# kappa = cohen_kappa_score(data1, data2)
-# print("CohensKappa:")
-# print(kappa)
-
-# df = pd.DataFrame({
-#     'a': [0, 1, 2, 1, 0],
-#     'b': [0, 1, 2, 0, 0],
-#     'c': [0, 1, 2, 1, 0],
-#     'd': [0, 1, 2, 1, 2],
-# })
-
-
 from sklearn.metrics import cohen_kappa_score
 import seaborn as sns
 import matplotlib.pyplot as plt

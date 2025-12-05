@@ -1,18 +1,14 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV, cross_validate, StratifiedKFold
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from lightgbm import LGBMClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, roc_auc_score, make_scorer
 
 # ========= 数据加载 ========= #
 # 替换成你自己的路径
-from model.mlClassifiers import read_origin_data
+from ours.mlClassifiers import read_origin_data
 
 train_x, train_y = read_origin_data("../info/ranked_data_res_train.csv")
 test_x, test_y = read_origin_data("../info/ranked_data_res_test.csv")
